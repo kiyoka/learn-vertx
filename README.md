@@ -1,4 +1,4 @@
-learn-virtx
+learn-vertx
 ===========
 
 My personal repository for learning Vert.x (web framework)
