@@ -7,6 +7,7 @@ require 'memcache'
 
 masterHash = {}
 notifyHash = Memcache.new( :server => "localhost:11211" )
+#notifyHash = Vertx::SharedData::get_hash("notifyHash")
 
 masterdb_server = Vertx::HttpServer.new
 masterdb_server.request_handler do |req|

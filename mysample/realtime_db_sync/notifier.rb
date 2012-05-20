@@ -8,7 +8,7 @@ INTERVAL    = 0.5
 POLLING_SEC = 60
 
 notifyHash = Memcache.new( :server => "localhost:11211" )
-#Vertx::SharedData::get_hash("notifyHash")
+#notifyHash = Vertx::SharedData::get_hash("notifyHash")
 
 def notify( res, str )
   res.write_str( "notify! #{str}\n"  )
