@@ -4,7 +4,8 @@ require 'memcache'
 
 # use http://en.wikipedia.org/wiki/Chunked_transfer_encoding
 
-INTERVAL = 0.5
+INTERVAL    = 0.5
+POLLING_SEC = 10
 
 notifyHash = Memcache.new( :server => "localhost:11211" )
 #Vertx::SharedData::get_hash("notifyHash")
@@ -17,25 +18,29 @@ notifier = Vertx::HttpServer.new
 notifier.request_handler do |req|
   puts 'Notifier: An HTTP request has been received'
 
-  req.end_handler do
-    query = CGI::parse( req.query )
-    username = query[ 'username' ].first
-    # Now send back a response
-    req.response.chunked = true
+  query = CGI::parse( req.query )
+  username = query[ 'username' ].first
+  # Now send back a response
+  req.response.chunked = true
+  
+  got         = nil
+  timer_count = 0
 
-    # wait for notify event.
-    got = nil
-    (10 / INTERVAL).to_i.times { |i|
-      if notifyHash[ username ]
-        if got != notifyHash[ username ]
-          got = notifyHash[ username ]
-          notify( req.response, got )
-        end
+  Vertx::set_periodic (1000 * INTERVAL) { |timer_id|
+    timer_count += INTERVAL
+    puts "timer_count = " + timer_count.to_s
+    
+    if notifyHash[ username ]
+      if got != notifyHash[ username ]
+        got = notifyHash[ username ]
+        notify( req.response, got )
       end
-      sleep( INTERVAL )
-    }
+    end
 
-    req.response.end
-  end
-
+    if ( POLLING_SEC < timer_count )
+      req.response.end
+      puts "response.end"
+      Vertx::cancel_timer(timer_id)
+    end
+  }
 end.listen(8080, 'localhost')
