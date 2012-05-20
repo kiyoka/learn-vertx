@@ -6,6 +6,8 @@ require 'cgi'
 #require 'dbm'
 #masterHash = DBM.new( "/tmp/masterHash" )
 
+masterHash = {}
+
 server = Vertx::HttpServer.new
 server.request_handler do |req|
 
@@ -20,16 +22,21 @@ server.request_handler do |req|
     case req.path
     when "/putValues"
       pp ["putValues",  values ]
+
       # update db
       values.each { |key,value|
         masterHash[ key ] = value
       }
-      # notify to each client
-      
+
+      # notify to all client
+      Vertx::EventBus.send('bus.notify', 'new values came, you must sync.') do |message|
+        puts("I received a reply #{message.body}")
+      end
 
     when "/getValues"
       pp ["getValues",  values ]
     end
+
     req.response.end
   end
 
