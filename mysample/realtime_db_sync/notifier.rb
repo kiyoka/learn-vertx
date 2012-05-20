@@ -5,7 +5,7 @@ require 'memcache'
 # use http://en.wikipedia.org/wiki/Chunked_transfer_encoding
 
 INTERVAL    = 0.5
-POLLING_SEC = 10
+POLLING_SEC = 60
 
 notifyHash = Memcache.new( :server => "localhost:11211" )
 #Vertx::SharedData::get_hash("notifyHash")
