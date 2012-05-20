@@ -8,8 +8,8 @@ require 'cgi'
 
 masterHash = {}
 
-server = Vertx::HttpServer.new
-server.request_handler do |req|
+masterdb_server = Vertx::HttpServer.new
+masterdb_server.request_handler do |req|
 
   puts "An HTTP request has been received (method=#{req.method})"
 
@@ -29,9 +29,7 @@ server.request_handler do |req|
       }
 
       # notify to all client
-      Vertx::EventBus.send('bus.notify', 'new values came, you must sync.') do |message|
-        puts("I received a reply #{message.body}")
-      end
+      Vertx::EventBus.send('bus.notify', 'new values came, you must sync.')
 
     when "/getValues"
       pp ["getValues",  values ]
@@ -41,3 +39,4 @@ server.request_handler do |req|
   end
 
 end.listen(8081, 'localhost')
+

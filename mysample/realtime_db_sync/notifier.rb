@@ -11,8 +11,8 @@ Vertx::EventBus.register_handler('bus.notify') do |message|
 end
 
 
-server = Vertx::HttpServer.new
-server.request_handler do |req|
+notifier = Vertx::HttpServer.new
+notifier.request_handler do |req|
   puts 'An HTTP request has been received'
 
   req.end_handler do
@@ -22,7 +22,6 @@ server.request_handler do |req|
 
     handlerId = Vertx::EventBus.register_handler('bus.notify') do |message|
       puts("I received a message from masterdb.rb #{message.body}")
-      message.reply('OK, I will send notify to my client...')
       notify( req )
     end
 
