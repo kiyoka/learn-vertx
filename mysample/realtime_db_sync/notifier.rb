@@ -11,7 +11,7 @@ notifyHash = Memcache.new( :server => "localhost:11211" )
 #notifyHash = Vertx::SharedData::get_hash("notifyHash")
 
 def notify( res, str )
-  res.write_str( "notify! #{str}\n"  )
+  res.write_str( "#{str}\n"  )
 end
 
 notifier = Vertx::HttpServer.new
