@@ -61,8 +61,8 @@ and realtime notifier.
 
 ## Long polling notifier
 
-"long polling" is technique to archive the http based push notify.
-It can be use https and can be connect over ordinary http proxy servers.
+"long polling" is technique to achive to implement the http based push notifier
+It can be use https and can be connected over ordinary http proxy servers.
 
 Notifier of this system use "Chunked_transfer_encoding" for it.
 
