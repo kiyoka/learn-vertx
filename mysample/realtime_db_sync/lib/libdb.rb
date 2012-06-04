@@ -2,21 +2,23 @@ require 'gdbm'
 
 module DBSync
   class MasterDB
-    def initialize()
+    def initialize( basepath = "/tmp/")
+      @basepath = basepath
     end
 
-    def open( name )
-      @db = GDBM.new( name )
+    def open( username )
+      @db = GDBM.new( @basepath + username + ".db" )
       if not @db
-        raise RuntimeError, sprintf( "DBM.new error: file=%s", name )
+        raise RuntimeError, sprintf( "DBM.new error: file=%s", username + ".db" )
       end
+      @username = username
     end
 
-    def getList( username )
-      forward_match_keys( username )
+    def getList( )
+      forward_match_keys( "" )
     end
 
-    def getValue( username, key )
+    def getValue( key )
       fallback = false
       val = @db[ key ]
       if val
@@ -26,11 +28,11 @@ module DBSync
       end
     end
 
-    def insertValue( username, key, value )
+    def insertValue( key, value )
       @db[ key.force_encoding("ASCII-8BIT") ] = value.force_encoding("ASCII-8BIT")
     end
 
-    def deleteValue( username, key )
+    def deleteValue( key )
       @db.delete( key )
     end
 
@@ -38,6 +40,10 @@ module DBSync
       @db.keys( ).select {|key|
         key.match( "^" + prefix )
       }
+    end
+
+    def clear
+      @db.clear
     end
 
     def close

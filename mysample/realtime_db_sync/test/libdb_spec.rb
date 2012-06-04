@@ -33,20 +33,55 @@
 #   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 require 'libdb'
+require 'libutil'
 include DBSync
 
 DBPATH="/tmp/libdb.db"
 
-describe MasterDB, "getList() API" do
+def generateSampleData()
+
+
+end
+
+describe MasterDB, "masterDB API operations are " do
 
   before do
     @masterdb = MasterDB.new
-    @masterdb.open( DBPATH )
-    @username = "user1"
+    @masterdb.open( "user1" )
+    @util = Util.new
+
+    ###         date,                           value
+    @data = [[ "1338738983:06/04/12:00:56:22",  "first data" ],
+             [ "1338814085:06/04/12:21:48:04",  "text data1" ]]
   end
 
   it "should" do
-    @masterdb.getList( @username ).should == []
+    @masterdb.clear( )
+    @masterdb.getList( ).should == []
+
+    @data.each { |entry|
+      date  = entry[0]
+      value = entry[1]
+      digest = @util.digest( value )
+      key = date + "-" + digest
+      @masterdb.insertValue( key, value )
+    }
+
+    keys = @masterdb.getList( )
+    keys.should == 
+      ["1338814085:06/04/12:21:48:04-f0c62da87f30bff2543cbd44733c17ea9ba84f68",
+       "1338738983:06/04/12:00:56:22-663ea86d450042b6e7ea651f492e4109cb9e875b"]
+    
+    @masterdb.getValue( keys[0] ).should == 'first data'
+    @masterdb.getValue( keys[1] ).should == 'text data1'
+
+    date = "1338814090:06/04/12:21:48:09"
+    key = date + "-" + @util.digest( 'text data2' )
+    @masterdb.insertValue( key, 'text data2' )
+    
+    keys = @masterdb.getList( )
+    keys.size.should                     == 3
+    keys.should                          ==
+      []
   end
 end
-
