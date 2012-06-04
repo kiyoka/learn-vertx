@@ -69,8 +69,8 @@ describe MasterDB, "masterDB API operations are " do
 
     keys = @masterdb.getList( )
     keys.should == 
-      ["1338814085:06/04/12:21:48:04-f0c62da87f30bff2543cbd44733c17ea9ba84f68",
-       "1338738983:06/04/12:00:56:22-663ea86d450042b6e7ea651f492e4109cb9e875b"]
+      ["1338738983:06/04/12:00:56:22-663ea86d450042b6e7ea651f492e4109cb9e875b",
+       "1338814085:06/04/12:21:48:04-f0c62da87f30bff2543cbd44733c17ea9ba84f68"]
     
     @masterdb.getValue( keys[0] ).should == 'first data'
     @masterdb.getValue( keys[1] ).should == 'text data1'
@@ -82,6 +82,11 @@ describe MasterDB, "masterDB API operations are " do
     keys = @masterdb.getList( )
     keys.size.should                     == 3
     keys.should                          ==
-      []
+      ["1338738983:06/04/12:00:56:22-663ea86d450042b6e7ea651f492e4109cb9e875b",
+       "1338814085:06/04/12:21:48:04-f0c62da87f30bff2543cbd44733c17ea9ba84f68",
+       "1338814090:06/04/12:21:48:09-19dd9dda20e2fe783b5408a614a6b3c4357beace"]
+
+    @masterdb.getValue( keys[2] ).should == 'text data2'
+
   end
 end

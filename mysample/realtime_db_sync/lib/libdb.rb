@@ -15,7 +15,7 @@ module DBSync
     end
 
     def getList( )
-      forward_match_keys( "" )
+      forward_match_keys( "" ).sort
     end
 
     def getValue( key )
