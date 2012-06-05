@@ -88,5 +88,12 @@ describe MasterDB, "masterDB API operations are " do
 
     @masterdb.getValue( keys[2] ).should == 'text data2'
 
+    @masterdb.deleteValue( keys[1] ).should == true
+
+    keys = @masterdb.getList( )
+    keys.size.should                     == 2
+    keys.should                          ==
+      ["1338738983:06/04/12:00:56:22-663ea86d450042b6e7ea651f492e4109cb9e875b",
+       "1338814090:06/04/12:21:48:09-19dd9dda20e2fe783b5408a614a6b3c4357beace"]
   end
 end

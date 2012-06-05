@@ -33,7 +33,13 @@ module DBSync
     end
 
     def deleteValue( key )
-      @db.delete( key )
+      val = @db[ key ]
+      if val
+        @db.delete( key )
+        true
+      else
+        false
+      end
     end
 
     def forward_match_keys( prefix )
