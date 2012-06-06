@@ -70,3 +70,18 @@ describe Util, "When key util is called...  " do
     @util.key_digest( @key1 ).should     == 'f0c62da87f30bff2543cbd44733c17ea9ba84f68'
   end
 end
+
+
+describe Util, "When diffList util is called...  " do
+
+  before do
+    @util = Util.new
+
+    @masterList = [ "a", "b", "c", "d" ]
+    @localList  = [      "b", "c"      ] 
+  end
+
+  it "should" do
+    @util.diffList( @masterList, @localList ) == [ "a", "d" ]
+  end
+end

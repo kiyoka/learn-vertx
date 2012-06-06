@@ -36,8 +36,6 @@ require 'libdb'
 require 'libutil'
 include DBSync
 
-DBPATH="/tmp/libdb.db"
-
 
 describe MasterDB, "masterDB API operations are " do
 

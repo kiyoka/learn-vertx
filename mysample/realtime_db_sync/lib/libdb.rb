@@ -1,7 +1,7 @@
 require 'gdbm'
 
 module DBSync
-  class MasterDB
+  class BaseDB
     def initialize( basepath = "/tmp/")
       @basepath = basepath
     end
@@ -56,4 +56,11 @@ module DBSync
       @db.close
     end
   end
+
+  class MasterDB < BaseDB
+  end
+
+  class LocalDB < BaseDB
+  end
+
 end

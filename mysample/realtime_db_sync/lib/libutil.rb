@@ -1,5 +1,6 @@
 require 'digest'
 require 'date'
+require 'set'
 
 module DBSync
   class Util
@@ -47,6 +48,14 @@ module DBSync
       else
         nil
       end
+    end
+
+    def diffList( list1, list2 )
+      set1 = Set.new
+      set2 = Set.new
+      list1.each { |e| set1.add(e) }
+      list2.each { |e| set2.add(e) }
+      set1.difference( set2 ).to_a
     end
   end
 end
