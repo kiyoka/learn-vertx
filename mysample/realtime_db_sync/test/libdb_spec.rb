@@ -38,10 +38,6 @@ include DBSync
 
 DBPATH="/tmp/libdb.db"
 
-def generateSampleData()
-
-
-end
 
 describe MasterDB, "masterDB API operations are " do
 
@@ -51,8 +47,8 @@ describe MasterDB, "masterDB API operations are " do
     @util = Util.new
 
     ###         date,                           value
-    @data = [[ "1338738983:06/04/12:00:56:22",  "first data" ],
-             [ "1338814085:06/04/12:21:48:04",  "text data1" ]]
+    @data = [[ "1338738983=06/04/12:00:56:22",  "first data" ],
+             [ "1338814085=06/04/12:21:48:04",  "text data1" ]]
   end
 
   it "should" do
@@ -63,28 +59,28 @@ describe MasterDB, "masterDB API operations are " do
       date  = entry[0]
       value = entry[1]
       digest = @util.digest( value )
-      key = date + "-" + digest
+      key = date + "=" + digest
       @masterdb.insertValue( key, value )
     }
 
     keys = @masterdb.getList( )
     keys.should == 
-      ["1338738983:06/04/12:00:56:22-663ea86d450042b6e7ea651f492e4109cb9e875b",
-       "1338814085:06/04/12:21:48:04-f0c62da87f30bff2543cbd44733c17ea9ba84f68"]
+      ["1338738983=06/04/12:00:56:22=663ea86d450042b6e7ea651f492e4109cb9e875b",
+       "1338814085=06/04/12:21:48:04=f0c62da87f30bff2543cbd44733c17ea9ba84f68"]
     
     @masterdb.getValue( keys[0] ).should == 'first data'
     @masterdb.getValue( keys[1] ).should == 'text data1'
 
-    date = "1338814090:06/04/12:21:48:09"
-    key = date + "-" + @util.digest( 'text data2' )
+    date = "1338814090=06/04/12:21:48:09"
+    key = date + "=" + @util.digest( 'text data2' )
     @masterdb.insertValue( key, 'text data2' )
     
     keys = @masterdb.getList( )
     keys.size.should                     == 3
     keys.should                          ==
-      ["1338738983:06/04/12:00:56:22-663ea86d450042b6e7ea651f492e4109cb9e875b",
-       "1338814085:06/04/12:21:48:04-f0c62da87f30bff2543cbd44733c17ea9ba84f68",
-       "1338814090:06/04/12:21:48:09-19dd9dda20e2fe783b5408a614a6b3c4357beace"]
+      ["1338738983=06/04/12:00:56:22=663ea86d450042b6e7ea651f492e4109cb9e875b",
+       "1338814085=06/04/12:21:48:04=f0c62da87f30bff2543cbd44733c17ea9ba84f68",
+       "1338814090=06/04/12:21:48:09=19dd9dda20e2fe783b5408a614a6b3c4357beace"]
 
     @masterdb.getValue( keys[2] ).should == 'text data2'
 
@@ -93,7 +89,7 @@ describe MasterDB, "masterDB API operations are " do
     keys = @masterdb.getList( )
     keys.size.should                     == 2
     keys.should                          ==
-      ["1338738983:06/04/12:00:56:22-663ea86d450042b6e7ea651f492e4109cb9e875b",
-       "1338814090:06/04/12:21:48:09-19dd9dda20e2fe783b5408a614a6b3c4357beace"]
+      ["1338738983=06/04/12:00:56:22=663ea86d450042b6e7ea651f492e4109cb9e875b",
+       "1338814090=06/04/12:21:48:09=19dd9dda20e2fe783b5408a614a6b3c4357beace"]
   end
 end
