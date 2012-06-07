@@ -5,9 +5,11 @@ require 'cgi'
 require 'date'
 require 'memcache'
 
-masterHash = {}
+$LOAD_PATH.push( File.dirname(__FILE__) + "/../lib" )
+require 'libutil'
+require 'libdb'
+
 notifyHash = Memcache.new( :server => "localhost:11211" )
-#notifyHash = Vertx::SharedData::get_hash("notifyHash")
 
 masterdb_server = Vertx::HttpServer.new
 masterdb_server.request_handler do |req|
@@ -20,6 +22,9 @@ masterdb_server.request_handler do |req|
     query = CGI::parse( req.query )
     username = query[ 'username' ].first
 
+    masterdb = DBSync::MasterDB.new
+    masterdb.open( username )
+
     case req.path
     when "/insertValue"
       kv = JSON::parse( body.to_s )
@@ -27,27 +32,30 @@ masterdb_server.request_handler do |req|
       
       # update db
       kv.each { |k,v|
-        masterHash[ k ] = v
+        masterdb.insertValue( k.dup, v.dup )
       
         # notify to all client
         notifyHash[ username ] = k
-        Vertx::EventBus.send('bus.notify', 'new values came, you must sync.')
       }
+      masterdb.close()
       req.response.end()
 
     when "/getList"
-      str = masterHash.keys.join( "\n" )
+      str = masterdb.getList( ).join( "\n" )
       pp ["getList", str ]
+      masterdb.close()
       req.response.end( str )
 
     when "/getValue"
       k = body.to_s.chomp
-      str = if masterHash[ k ]
-              masterHash[ k ]
-            else
-              ""
-            end
+      str = masterdb.getValue( k.dup )
+      if str
+        str
+      else
+        ""
+      end
       pp ["getValue", k, str ]
+      masterdb.close()
       req.response.end( str )
     end
 

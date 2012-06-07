@@ -25,7 +25,7 @@ end
 def sync_db( username )
   puts "sync db..."
   masterList = open( sprintf( "http://#{SERVER_HOST}:8081/getList?username=%s", username ), "r" ) {|f|
-    f.readlines
+    f.readlines.map { |x| x.chomp }
   }
   # open local db
   localdb = DBSync::LocalDB.new( File.expand_path( "~/.localdb/" ) + "/" )
