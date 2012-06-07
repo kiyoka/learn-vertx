@@ -14,41 +14,42 @@ masterdb_server.request_handler do |req|
 
   puts "MasterDB: An HTTP request has been received"
 
-  kv = nil
-
   req.body_handler do |body|
     puts "The total body received was #{body.length} bytes, path is #{req.path}."
 
     query = CGI::parse( req.query )
     username = query[ 'username' ].first
 
-    params = CGI::parse( body.to_s )
-    if params.key?( 'kv' )
-      kv = JSON( params[ 'kv' ].first )
+    case req.path
+    when "/insertValue"
+      kv = JSON::parse( body.to_s )
+      pp ["insertValue", kv ]
+      
+      # update db
+      kv.each { |k,v|
+        masterHash[ k ] = v
+      
+        # notify to all client
+        notifyHash[ username ] = k
+        Vertx::EventBus.send('bus.notify', 'new values came, you must sync.')
+      }
+      req.response.end()
+
+    when "/getList"
+      str = masterHash.keys.join( "\n" )
+      pp ["getList", str ]
+      req.response.end( str )
+
+    when "/getValue"
+      k = body.to_s.chomp
+      str = if masterHash[ k ]
+              masterHash[ k ]
+            else
+              ""
+            end
+      pp ["getValue", k, str ]
+      req.response.end( str )
     end
-  end
 
-  case req.path
-  when "/insertValue"
-    pp ["insertValue",  kv ]
-    
-    # update db
-    kv.each { |k,v|
-      masterHash[ k ] = v
-    }
-    
-    # notify to all client
-    dt = DateTime::now()
-    currentDate = dt.strftime( "%s" ) + " " + dt.strftime( "%x %X" )
-    pp [ "currentDate", currentDate ]
-    notifyHash[ username ] = currentDate
-    Vertx::EventBus.send('bus.notify', 'new values came, you must sync.')
-    
-  when "/getList"
-    #masterHash.keys.each { |k|
-    #  req.response.write_str( k + "\n" )
-    #}
-    req.response.end( "aaa\n" )
   end
-
 end.listen(8081, 'localhost')

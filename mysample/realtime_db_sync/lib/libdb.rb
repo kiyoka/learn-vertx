@@ -18,8 +18,7 @@ module DBSync
       forward_match_keys( "" ).sort
     end
 
-    def getValue( key )
-      fallback = false
+    def getValue( key, fallback = false )
       val = @db[ key ]
       if val
         val.force_encoding("UTF-8")

@@ -10,13 +10,25 @@ require 'libutil'
 
 SERVER_HOST='localhost'
 
+def getValue( username, key )
+  uri = URI.parse("http://#{SERVER_HOST}:8081/getValue?username=#{username}")
+  ret = ""
+  Net::HTTP.start(uri.host, uri.port) do |http|
+    http.post(uri.request_uri, key, {"content-type" => "plain/text"}) { |str|
+      puts [ "getValue's posponse is", str ]
+      ret = str
+    }
+  end
+  ret
+end
+
 def sync_db( username )
   puts "sync db..."
-  masterList = open( sprintf( "http://%s:8081/getList?username=%s", SERVER_HOST, username ), "r" ) {|f|
+  masterList = open( sprintf( "http://#{SERVER_HOST}:8081/getList?username=%s", username ), "r" ) {|f|
     f.readlines
   }
   # open local db
-  localdb = DBSync::LocalDB.new( File.expand_path( "~/.localdb/" ))
+  localdb = DBSync::LocalDB.new( File.expand_path( "~/.localdb/" ) + "/" )
   localdb.open( username )
 
   # calc difference between master and local.
@@ -24,22 +36,44 @@ def sync_db( username )
   util = DBSync::Util.new
   diffList = util.diffList( masterList, localList )
 
-  diffList.each {|e|
-    puts "entry: #{e}"
+  diffList.each {|key|
+    puts "key: #{key}"
+    value = getValue( username, key )
+    puts "value: #{value}"
+    localdb.insertValue( key.dup, value.dup )
   }
+  localdb.close()
+end
+
+def record_exist?( username, key )
+  # open local db
+  localdb = DBSync::LocalDB.new( File.expand_path( "~/.localdb/" ) + "/" )
+  localdb.open( username )
+  ret = localdb.getValue( key, nil )
+  localdb.close()
+  ret
 end
 
 def wait_notify( username )
-  uri = URI.parse("http://localhost:8080/?username=#{username}")
-  Net::HTTP.start(uri.host, uri.port) do |http|
-    request = Net::HTTP::Get.new(uri.request_uri)
-    http.request(request) do |response|
-      raise 'Response is not chuncked' unless response.chunked?
-      response.read_body do |chunk|
-        puts "#{chunk}"
-        return chunk.chomp
+  begin
+    uri = URI.parse("http://localhost:8080/?username=#{username}")
+    Net::HTTP.start(uri.host, uri.port) do |http|
+      request = Net::HTTP::Get.new(uri.request_uri)
+      http.request(request) do |response|
+        raise 'Response is not chuncked' unless response.chunked?
+        response.read_body do |chunk|
+          key = chunk.chomp
+          if record_exist?( username, key )
+            puts "exist:#{key}"
+          else
+            puts "sync!:#{key}"
+            return chunk.chomp
+          end
+        end
       end
     end
+  rescue Timeout::Error => e
+    return :timeout
   end
 end
 
@@ -49,9 +83,14 @@ def main
     puts "usage: clientdb.rb [USERNAME]"
     exit 1
   end
-  result = wait_notify( ARGV[0] )
-  if result
-    sync_db( ARGV[0] )
+  while true
+    result = wait_notify( ARGV[0] )
+    case result
+    when :timeout
+      puts "timeout..."
+    else
+      sync_db( ARGV[0] )
+    end
   end
 end
 

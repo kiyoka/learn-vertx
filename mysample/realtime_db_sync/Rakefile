@@ -65,10 +65,14 @@ task :syncB do
   sh "ruby -I ./lib bin/clientSync  #{USERNAME_B}"
 end
 
-task :insertA1 do
-  sh "curl  --data-ascii \'kv={\"1337697112:6f96cfdfe5ccc627cadf24b41725caa4\" : \"hello\"}\'  #{MDB_URL}/insertValue?username=#{USERNAME_A}"
+task :postA1 do
+  sh "echo 'aaa1' | ruby -I ./lib bin/clientPost  #{USERNAME_A}"
 end
 
+task :postA2 do
+  sh "echo 'aaa2' | ruby -I ./lib bin/clientPost  #{USERNAME_A}"
+end
 
-
-
+task :postB1 do
+  sh "echo 'bbb1' | ruby -I ./lib bin/clientPost  #{USERNAME_B}"
+end
