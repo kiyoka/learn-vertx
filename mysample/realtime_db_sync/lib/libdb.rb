@@ -14,8 +14,13 @@ module DBSync
       @username = username
     end
 
-    def getList( )
-      forward_match_keys( "" ).sort
+    def getList( limit = nil )
+      arr = forward_match_keys( "" ).sort {|a,b| -(a <=> b) }
+      if limit
+        arr.take( limit )
+      else
+        arr
+      end
     end
 
     def getValue( key, fallback = false )
